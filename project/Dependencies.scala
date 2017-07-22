@@ -6,6 +6,7 @@ object Dependencies {
   private val ScalaLogging        = "com.typesafe.scala-logging" %% "scala-logging"        % "3.5.0"
   private val MysqlDriver         = "mysql"                       % "mysql-connector-java" % "6.0.6"
   private val MssqlDriver         = "com.microsoft.sqlserver"     % "mssql-jdbc"           % "6.1.0.jre8" exclude("javax.xml.stream", "stax-api")
+  private val PostgresqlDriver    = "org.postgresql"              % "postgresql"           % "42.1.3"
   private val KafkaConnectApi     = "org.apache.kafka"            % "connect-api"          % "0.9.0.0"
   private val Enumeratum          = "com.beachape"               %% "enumeratum"           % "1.5.12"
   private val Scalatics           = "org.scalactic"              %% "scalactic"            % ScalaTestV  % "test"
@@ -13,7 +14,7 @@ object Dependencies {
   private val Mockito             = "org.mockito"                 % "mockito-core"         % "2.8.9"     % "test"
 
   object Compile {
-    def kafkaJdbcConnector  = Seq(ScalaLogging, KafkaConnectApi, MysqlDriver, MssqlDriver, Enumeratum)
+    def kafkaJdbcConnector  = Seq(ScalaLogging, KafkaConnectApi, MysqlDriver, MssqlDriver, PostgresqlDriver, Enumeratum)
   }
 
   object Test {

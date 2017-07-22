@@ -5,7 +5,7 @@ import java.sql.{Connection, PreparedStatement, ResultSet}
 
 import com.agoda.kafka.connector.jdbc.JdbcSourceConnectorConstants
 import com.agoda.kafka.connector.jdbc.models.DatabaseProduct
-import com.agoda.kafka.connector.jdbc.models.DatabaseProduct.{MsSQL, MySQL}
+import com.agoda.kafka.connector.jdbc.models.DatabaseProduct.{MsSQL, MySQL, PostgreSQL}
 import com.agoda.kafka.connector.jdbc.models.Mode.IncrementingMode
 import com.agoda.kafka.connector.jdbc.utils.DataConverter
 import org.apache.kafka.connect.data.Schema
@@ -40,8 +40,9 @@ case class IdBasedDataService(databaseProduct: DatabaseProduct,
 
   override protected def createPreparedStatement(connection: Connection): Try[PreparedStatement] = Try {
     val preparedStatement = databaseProduct match {
-      case MsSQL => connection.prepareStatement(s"EXECUTE $storedProcedureName @$incrementingVariableName = ?, @$batchSizeVariableName = ?")
-      case MySQL => connection.prepareStatement(s"CALL $storedProcedureName (@$incrementingVariableName := ?, @$batchSizeVariableName := ?)")
+      case MsSQL       => connection.prepareStatement(s"EXECUTE $storedProcedureName @$incrementingVariableName = ?, @$batchSizeVariableName = ?")
+      case MySQL       => connection.prepareStatement(s"CALL $storedProcedureName (@$incrementingVariableName := ?, @$batchSizeVariableName := ?)")
+      case PostgreSQL  => connection.prepareStatement(s"SELECT $storedProcedureName (?, ?)")
     }
     preparedStatement.setObject(1, incrementingOffset)
     preparedStatement.setObject(2, batchSize)
@@ -78,6 +79,9 @@ case class IdBasedDataService(databaseProduct: DatabaseProduct,
       }
     }
     incrementingOffset = max
+    println("%%%%%%%%%%%%%%%%%%%%%%%% Id Based %%%")
+    println(sourceRecords.toList)
+    println("%%%%%%%%%%%%%%%%%%%%%%%%")
     sourceRecords
   }
 

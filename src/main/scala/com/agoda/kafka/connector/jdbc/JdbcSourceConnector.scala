@@ -12,7 +12,7 @@ import scala.util.{Failure, Success, Try}
 
 class JdbcSourceConnector extends SourceConnector {
   private val logger = LoggerFactory.getLogger(classOf[JdbcSourceConnector])
-
+  Class.forName("org.postgresql.Driver")
   private var config: JdbcSourceConnectorConfig = _
 
 /**

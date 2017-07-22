@@ -5,7 +5,7 @@ import java.util.{Date, GregorianCalendar, TimeZone}
 
 import com.agoda.kafka.connector.jdbc.JdbcSourceConnectorConstants
 import com.agoda.kafka.connector.jdbc.models.DatabaseProduct
-import com.agoda.kafka.connector.jdbc.models.DatabaseProduct.{MsSQL, MySQL}
+import com.agoda.kafka.connector.jdbc.models.DatabaseProduct.{MsSQL, MySQL, PostgreSQL}
 import com.agoda.kafka.connector.jdbc.models.Mode.TimestampMode
 import com.agoda.kafka.connector.jdbc.utils.DataConverter
 import org.apache.kafka.connect.data.Schema
@@ -41,8 +41,9 @@ case class TimeBasedDataService(databaseProduct: DatabaseProduct,
 
   override protected def createPreparedStatement(connection: Connection): Try[PreparedStatement] = Try {
     val preparedStatement = databaseProduct match {
-      case MsSQL => connection.prepareStatement(s"EXECUTE $storedProcedureName @$timestampVariableName = ?, @$batchSizeVariableName = ?")
-      case MySQL => connection.prepareStatement(s"CALL $storedProcedureName (@$timestampVariableName := ?, @$batchSizeVariableName := ?)")
+      case MsSQL      => connection.prepareStatement(s"EXECUTE $storedProcedureName @$timestampVariableName = ?, @$batchSizeVariableName = ?")
+      case MySQL      => connection.prepareStatement(s"CALL $storedProcedureName (@$timestampVariableName := ?, @$batchSizeVariableName := ?)")
+      case PostgreSQL => connection.prepareStatement(s"SELECT $storedProcedureName (?, ?)")
     }
     preparedStatement.setTimestamp(1, new Timestamp(timestampOffset), UTC_CALENDAR)
     preparedStatement.setObject(2, batchSize)
@@ -71,6 +72,9 @@ case class TimeBasedDataService(databaseProduct: DatabaseProduct,
       }
     }
     timestampOffset = max
+    println("%%%%%%%%%%%%%%%%%%%%%%%% Time Based %%%")
+    println(sourceRecords.toList)
+    println("%%%%%%%%%%%%%%%%%%%%%%%%")
     sourceRecords
   }
 

@@ -12,6 +12,7 @@ import scala.collection.immutable.IndexedSeq
   *
   * MySQL :: MySQL Server.
   *
+  * PostgreSQL :: PostgreSQL Server.
   */
 sealed abstract class DatabaseProduct(override val entryName: String) extends EnumEntry
 
@@ -21,4 +22,5 @@ object DatabaseProduct extends Enum[DatabaseProduct] {
 
   case object MsSQL extends DatabaseProduct("Microsoft SQL Server")
   case object MySQL extends DatabaseProduct("MySQL")
+  case object PostgreSQL extends DatabaseProduct("PostgreSQL")
 }
