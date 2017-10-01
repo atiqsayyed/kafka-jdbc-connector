@@ -42,7 +42,7 @@ case class IdBasedDataService(databaseProduct: DatabaseProduct,
     val preparedStatement = databaseProduct match {
       case MsSQL       => connection.prepareStatement(s"EXECUTE $storedProcedureName @$incrementingVariableName = ?, @$batchSizeVariableName = ?")
       case MySQL       => connection.prepareStatement(s"CALL $storedProcedureName (@$incrementingVariableName := ?, @$batchSizeVariableName := ?)")
-      case PostgreSQL  => connection.prepareStatement(s"SELECT $storedProcedureName (?, ?)")
+      case PostgreSQL  => connection.prepareStatement(s"SELECT * from $storedProcedureName (?, ?)")
     }
     preparedStatement.setObject(1, incrementingOffset)
     preparedStatement.setObject(2, batchSize)
@@ -79,9 +79,6 @@ case class IdBasedDataService(databaseProduct: DatabaseProduct,
       }
     }
     incrementingOffset = max
-    println("%%%%%%%%%%%%%%%%%%%%%%%% Id Based %%%")
-    println(sourceRecords.toList)
-    println("%%%%%%%%%%%%%%%%%%%%%%%%")
     sourceRecords
   }
 

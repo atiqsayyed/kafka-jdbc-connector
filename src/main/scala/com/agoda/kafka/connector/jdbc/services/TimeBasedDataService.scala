@@ -43,7 +43,7 @@ case class TimeBasedDataService(databaseProduct: DatabaseProduct,
     val preparedStatement = databaseProduct match {
       case MsSQL      => connection.prepareStatement(s"EXECUTE $storedProcedureName @$timestampVariableName = ?, @$batchSizeVariableName = ?")
       case MySQL      => connection.prepareStatement(s"CALL $storedProcedureName (@$timestampVariableName := ?, @$batchSizeVariableName := ?)")
-      case PostgreSQL => connection.prepareStatement(s"SELECT $storedProcedureName (?, ?)")
+      case PostgreSQL => connection.prepareStatement(s"SELECT * from $storedProcedureName (?, ?)")
     }
     preparedStatement.setTimestamp(1, new Timestamp(timestampOffset), UTC_CALENDAR)
     preparedStatement.setObject(2, batchSize)
@@ -72,9 +72,6 @@ case class TimeBasedDataService(databaseProduct: DatabaseProduct,
       }
     }
     timestampOffset = max
-    println("%%%%%%%%%%%%%%%%%%%%%%%% Time Based %%%")
-    println(sourceRecords.toList)
-    println("%%%%%%%%%%%%%%%%%%%%%%%%")
     sourceRecords
   }
 

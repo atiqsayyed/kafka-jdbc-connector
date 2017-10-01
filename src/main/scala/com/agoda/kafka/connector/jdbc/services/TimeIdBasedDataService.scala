@@ -51,7 +51,7 @@ case class TimeIdBasedDataService(databaseProduct: DatabaseProduct,
     val preparedStatement = databaseProduct match {
       case MsSQL      => connection.prepareStatement(s"EXECUTE $storedProcedureName @$timestampVariableName = ?, @$incrementingVariableName = ?, @$batchSizeVariableName = ?")
       case MySQL      => connection.prepareStatement(s"CALL $storedProcedureName (@$timestampVariableName := ?, @$incrementingVariableName := ?, @$batchSizeVariableName := ?)")
-      case PostgreSQL => connection.prepareStatement(s"SELECT $storedProcedureName (?, ?, ?)")
+      case PostgreSQL => connection.prepareStatement(s"SELECT * from $storedProcedureName (?, ?, ?)")
     }
     preparedStatement.setTimestamp(1, new Timestamp(timestampOffset), UTC_CALENDAR)
     preparedStatement.setObject(2, incrementingOffset)
@@ -95,9 +95,6 @@ case class TimeIdBasedDataService(databaseProduct: DatabaseProduct,
     }
     timestampOffset = maxTime
     incrementingOffset = maxId
-    println("%%%%%%%%%%%%%%%%%%%%%%%% Time Id Based %%%")
-    println(sourceRecords.toList)
-    println("%%%%%%%%%%%%%%%%%%%%%%%%")
     sourceRecords
   }
 
