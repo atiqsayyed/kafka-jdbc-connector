@@ -4,7 +4,7 @@ import java.sql._
 import java.util.{GregorianCalendar, TimeZone}
 
 import com.agoda.kafka.connector.jdbc.JdbcSourceConnectorConstants
-import com.agoda.kafka.connector.jdbc.models.DatabaseProduct.{MsSQL, MySQL}
+import com.agoda.kafka.connector.jdbc.models.DatabaseProduct.{MsSQL, MySQL, PostgreSQL}
 import com.agoda.kafka.connector.jdbc.models.Mode.{IncrementingMode, TimestampMode}
 import com.agoda.kafka.connector.jdbc.utils.DataConverter
 import org.apache.kafka.connect.data.{Field, Schema, Struct}
@@ -54,6 +54,21 @@ class TimeBasedDataServiceTest extends WordSpec with Matchers with MockitoSugar 
         calendar = UTC_Calendar
       )
 
+    val timeBasedDataServicePostgreSQL =
+      TimeBasedDataService(
+        databaseProduct = PostgreSQL,
+        storedProcedureName = "stored-procedure",
+        batchSize = 100,
+        batchSizeVariableName = "batch-size-variable",
+        timestampVariableName = "timestamp-variable",
+        timestampOffset = 0L,
+        timestampFieldName = "time",
+        topic = "time-based-data-topic",
+        keyFieldOpt = None,
+        dataConverter = dataConverter,
+        calendar = UTC_Calendar
+      )
+
     val timestamp = new Timestamp(0L)
 
     "create correct prepared statement for Mssql" in {
@@ -82,6 +97,21 @@ class TimeBasedDataServiceTest extends WordSpec with Matchers with MockitoSugar 
       timeBasedDataServiceMysql.createPreparedStatement(connection)
 
       verify(connection).prepareStatement("CALL stored-procedure (@timestamp-variable := ?, @batch-size-variable := ?)")
+      verify(statement).setTimestamp(1, timestamp, UTC_Calendar)
+      verify(statement).setObject(2, 100)
+    }
+
+    "create correct prepared statement for PostgreSQL" in {
+      val connection = mock[Connection]
+      val statement = mock[PreparedStatement]
+
+      when(connection.prepareStatement("SELECT * from stored-procedure (?, ?)")).thenReturn(statement)
+      doNothing().when(statement).setTimestamp(1, timestamp, UTC_Calendar)
+      doNothing().when(statement).setObject(2, 100)
+
+      timeBasedDataServicePostgreSQL.createPreparedStatement(connection)
+
+      verify(connection).prepareStatement("SELECT * from stored-procedure (?, ?)")
       verify(statement).setTimestamp(1, timestamp, UTC_Calendar)
       verify(statement).setObject(2, 100)
     }

@@ -3,7 +3,7 @@ package com.agoda.kafka.connector.jdbc.services
 import java.sql.{Connection, PreparedStatement, ResultSet}
 
 import com.agoda.kafka.connector.jdbc.JdbcSourceConnectorConstants
-import com.agoda.kafka.connector.jdbc.models.DatabaseProduct.{MsSQL, MySQL}
+import com.agoda.kafka.connector.jdbc.models.DatabaseProduct.{MsSQL, MySQL, PostgreSQL}
 import com.agoda.kafka.connector.jdbc.models.Mode.IncrementingMode
 import com.agoda.kafka.connector.jdbc.utils.DataConverter
 import org.apache.kafka.connect.data.{Field, Schema, Struct}
@@ -50,6 +50,20 @@ class IdBasedDataServiceTest extends WordSpec with Matchers with MockitoSugar {
         dataConverter = dataConverter
       )
 
+    val idBasedDataServicePostgreSQL =
+      IdBasedDataService(
+        databaseProduct = PostgreSQL,
+        storedProcedureName = "stored-procedure",
+        batchSize = 100,
+        batchSizeVariableName = "batch-size-variable",
+        incrementingVariableName = "incrementing-variable",
+        incrementingOffset = 0L,
+        incrementingFieldName = "id",
+        topic = "id-based-data-topic",
+        keyFieldOpt = None,
+        dataConverter = dataConverter
+      )
+
     "create correct prepared statement for Mssql" in {
       val connection = mock[Connection]
       val statement = mock[PreparedStatement]
@@ -76,6 +90,21 @@ class IdBasedDataServiceTest extends WordSpec with Matchers with MockitoSugar {
       idBasedDataServiceMysql.createPreparedStatement(connection)
 
       verify(connection).prepareStatement("CALL stored-procedure (@incrementing-variable := ?, @batch-size-variable := ?)")
+      verify(statement).setObject(1, 0L)
+      verify(statement).setObject(2, 100)
+    }
+
+    "create correct prepared statement for PostgreSQL" in {
+      val connection = mock[Connection]
+      val statement = mock[PreparedStatement]
+
+      when(connection.prepareStatement("SELECT * from stored-procedure (?, ?)")).thenReturn(statement)
+      doNothing().when(statement).setObject(1, 0L)
+      doNothing().when(statement).setObject(2, 100)
+
+      idBasedDataServicePostgreSQL.createPreparedStatement(connection)
+
+      verify(connection).prepareStatement("SELECT * from stored-procedure (?, ?)")
       verify(statement).setObject(1, 0L)
       verify(statement).setObject(2, 100)
     }
