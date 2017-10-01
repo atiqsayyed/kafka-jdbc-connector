@@ -26,6 +26,7 @@ import scala.util.Try
   * @param timestampFieldName timestamp offset field name in returned records
   * @param topic name of kafka topic where records are stored
   * @param keyFieldOpt optional key field name in returned records
+  * @param dataConverter ResultSet converter utility
   */
 case class TimeBasedDataService(databaseProduct: DatabaseProduct,
                                 storedProcedureName: String,
@@ -35,40 +36,43 @@ case class TimeBasedDataService(databaseProduct: DatabaseProduct,
                                 var timestampOffset: Long,
                                 timestampFieldName: String,
                                 topic: String,
-                                keyFieldOpt: Option[String]) extends DataService {
+                                keyFieldOpt: Option[String],
+                                dataConverter: DataConverter,
+                                calendar: GregorianCalendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"))
+                               ) extends DataService {
 
-  private val UTC_CALENDAR = new GregorianCalendar(TimeZone.getTimeZone("UTC"))
-
-  override protected def createPreparedStatement(connection: Connection): Try[PreparedStatement] = Try {
+  override def createPreparedStatement(connection: Connection): Try[PreparedStatement] = Try {
     val preparedStatement = databaseProduct match {
       case MsSQL      => connection.prepareStatement(s"EXECUTE $storedProcedureName @$timestampVariableName = ?, @$batchSizeVariableName = ?")
       case MySQL      => connection.prepareStatement(s"CALL $storedProcedureName (@$timestampVariableName := ?, @$batchSizeVariableName := ?)")
       case PostgreSQL => connection.prepareStatement(s"SELECT * from $storedProcedureName (?, ?)")
     }
-    preparedStatement.setTimestamp(1, new Timestamp(timestampOffset), UTC_CALENDAR)
+    preparedStatement.setTimestamp(1, new Timestamp(timestampOffset), calendar)
     preparedStatement.setObject(2, batchSize)
     preparedStatement
   }
 
-  override protected def extractRecords(resultSet: ResultSet, schema: Schema): Try[Seq[SourceRecord]] = Try {
+  override def extractRecords(resultSet: ResultSet, schema: Schema): Try[Seq[SourceRecord]] = Try {
     val sourceRecords = ListBuffer.empty[SourceRecord]
     var max = timestampOffset
     while (resultSet.next()) {
-      DataConverter.convertRecord(schema, resultSet) map { record =>
+      dataConverter.convertRecord(schema, resultSet) map { record =>
         val time = record.get(timestampFieldName).asInstanceOf[Date].getTime
-        max = if(time > max) time else max
-        keyFieldOpt match {
-          case Some(keyField) =>
-            sourceRecords += new SourceRecord(
-              Map(JdbcSourceConnectorConstants.STORED_PROCEDURE_NAME_KEY -> storedProcedureName).asJava,
-              Map(TimestampMode.entryName -> time).asJava, topic, null, schema, record.get(keyField), schema, record
-            )
-          case None           =>
-            sourceRecords += new SourceRecord(
-              Map(JdbcSourceConnectorConstants.STORED_PROCEDURE_NAME_KEY -> storedProcedureName).asJava,
-              Map(TimestampMode.entryName -> time).asJava, topic, schema, record
-            )
-        }
+        max = if(time > max) {
+          keyFieldOpt match {
+            case Some(keyField) =>
+              sourceRecords += new SourceRecord(
+                Map(JdbcSourceConnectorConstants.STORED_PROCEDURE_NAME_KEY -> storedProcedureName).asJava,
+                Map(TimestampMode.entryName -> time).asJava, topic, null, schema, record.get(keyField), schema, record
+              )
+            case None           =>
+              sourceRecords += new SourceRecord(
+                Map(JdbcSourceConnectorConstants.STORED_PROCEDURE_NAME_KEY -> storedProcedureName).asJava,
+                Map(TimestampMode.entryName -> time).asJava, topic, schema, record
+              )
+          }
+          time
+        } else max
       }
     }
     timestampOffset = max
@@ -78,9 +82,9 @@ case class TimeBasedDataService(databaseProduct: DatabaseProduct,
   override def toString: String = {
     s"""
        |{
-       |   "name" : ${this.getClass.getSimpleName}
-       |   "mode" : ${TimestampMode.entryName}
-       |   "stored-procedure.name" : $storedProcedureName
+       |   "name" : "${this.getClass.getSimpleName}"
+       |   "mode" : "${TimestampMode.entryName}"
+       |   "stored-procedure.name" : "$storedProcedureName"
        |}
     """.stripMargin
   }

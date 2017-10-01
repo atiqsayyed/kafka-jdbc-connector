@@ -2,6 +2,8 @@
 [![Gitter chat](https://badges.gitter.im/kafka-jdbc-connector/kafka-jdbc-connector.png)](https://gitter.im/kafka-jdbc-connector/Lobby)
 [![License: Apache](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/agoda-com/kafka-jdbc-connector/blob/master/LICENSE.txt)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.agoda/kafka-jdbc-connector_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.agoda/kafka-jdbc-connector_2.11)
+[![Codecov branch](https://img.shields.io/codecov/c/github/agoda-com/kafka-jdbc-connector/master.svg)](https://github.com/agoda-com/kafka-jdbc-connector)
+[![CLA assistant](https://cla-assistant.io/readme/badge/agoda-com/kafka-jdbc-connector)](https://cla-assistant.io/agoda-com/kafka-jdbc-connector)
 
 Kafka JDBC Connector
 ====================

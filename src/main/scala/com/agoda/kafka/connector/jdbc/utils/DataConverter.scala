@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory
 
 import scala.util.Try
 
-object DataConverter {
-  private val logger = LoggerFactory.getLogger(classOf[JdbcSourceTask])
+class DataConverter {
+  private val logger = LoggerFactory.getLogger(this.getClass)
   private val UTC_CALENDAR = new GregorianCalendar(TimeZone.getTimeZone("UTC"))
 
 /**
@@ -140,9 +140,12 @@ object DataConverter {
         val clob = if (colType == Types.CLOB) resultSet.getClob(col) else resultSet.getNClob(col)
         val bytes =
           if(clob == null) null
-          else if(clob.length > Integer.MAX_VALUE) throw new IOException("Can't process CLOBs longer than Integer.MAX_VALUE")
+          else if(clob.length > Integer.MAX_VALUE) {
+            logger.warn("Can't process CLOBs longer than Integer.MAX_VALUE")
+            throw new IOException("Can't process CLOBs longer than Integer.MAX_VALUE")
+          }
           else clob.getSubString(1, clob.length.toInt)
-        clob.free()
+        if(clob != null) clob.free()
         bytes
 
       case Types.DATALINK =>
@@ -159,9 +162,12 @@ object DataConverter {
         val blob = resultSet.getBlob(col)
         val bytes =
           if (blob == null) null
-          else if (blob.length > Integer.MAX_VALUE) throw new IOException("Can't process BLOBs longer than Integer.MAX_VALUE")
+          else if (blob.length > Integer.MAX_VALUE) {
+            logger.warn("Can't process BLOBs longer than Integer.MAX_VALUE")
+            throw new IOException("Can't process BLOBs longer than Integer.MAX_VALUE")
+          }
           else blob.getBytes(1, blob.length.toInt)
-        blob.free()
+        if(blob != null) blob.free()
         bytes
 
       case Types.DATE => resultSet.getDate(col, UTC_CALENDAR)
