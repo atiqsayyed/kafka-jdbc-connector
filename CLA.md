@@ -8,13 +8,13 @@ Please complete, sign and return this Agreement to the Company below by using [G
 
 Please read this document carefully before signing and keep a copy for your records.
 
-- Full legal name: Atiquer Rehman Sayyed
-- Public name/Alias: Atiq Sayyed
-- Mailing Address: 202, Kherani co-op soc, near atul society, vapi, gujarat, India
-- Location: Bangkok
-- GitHub ID:atiqsayyed
-- Telephone:627149461
-- E-Mail:sayyedatiq@gmail.com
+- Full legal name:
+- Public name/Alias:
+- Mailing Address:
+- Location:
+- GitHub ID:
+- Telephone:
+- E-Mail:
 - Open Source Project(s):[Kafka JDBC Connector](https://github.com/agoda-com/kafka-jdbc-connector)
 
 You accept and agree to the following terms and conditions for Your past, present and future Contributions submitted to the Company.
@@ -71,22 +71,18 @@ complete details (including required attributions and details of applicable lice
 11. Entire agreement.
 
     This Agreement is the entire agreement, both written or oral, with respect to the Contributions between the parties. No amendment, modification or waiver of any provision of this Agreement will be effective unless in writing and signed by both parties. If any provision of this Agreement is held to be invalid or unenforceable, the remaining portions will remain in full force and effect and such provision will be enforced to the maximum extent possible so as to affect the intent of the parties and will be reformed to the extent necessary to make such provision valid and enforceable. All notices and other communications herein permitted or required under this Agreement will be sent by postage prepaid, via registered or certified mail or overnight courier, return receipt requested, or delivered personally to the parties at their respective addresses, or to such other address as either party will give to the other party in the manner provided herein for giving notice. Notice will be considered given upon receipt.
-    
-<br><br>
 
-\Atiq Sayyed
+\___________________________________
 
 Contributor
 
-\1/10/2017
+\___________________________________
 
 Date
 
-\Atiq Sayyed
+\___________________________________
 
 Print Name
-
-<br><br>
 
 Acknowledged [Agoda.com](https://www.agoda.com)
 
